@@ -9,3 +9,12 @@
 #-----EXTERNAL-----#
 #------------------#
 !/.gitignore
+!/.gitmodules
+!/Readme.md
+
+# Get submodule
+!/pass
+
+# Grab shell scripts from bin
+!/bin
+!/bin/*.sh
