@@ -12,9 +12,9 @@ _y="$(echo "${_rect}" | sed 's|\([0-9]*\)x\([0-9]*\)|\2|')"
 # Set a theme, or check if things are to be refreshed
 _theme=''
 _img=''
-_oldimg="${XDG_CACHE_HOME}/xpaper/last_wallpaper"
+_oldimg="${XDG_CACHE_HOME}/last_xpaper"
 _thisdir=''
-if [ "${1}" = 'reload' ] && [ -f "${_oldimg}" ] ; then
+if [ "${1}" = 'reload' ] && [ -L "${_oldimg}" ] ; then
     _img="${_oldimg}"
 elif [ -n "${1}" ] ; then
     if [ -d "${1}" ] ; then
@@ -65,16 +65,14 @@ else
     fi
 fi
 
+# Error; there is no image
 if [ -z "${_img}" ] ; then
     echo "No image was found"
     exit 3
 fi
 
 # Save the background location, for quick setting in the future
-if [ -n "${XDG_CACHE_HOME}" ] && [ -d "${XDG_CACHE_HOME}" ] ; then 
-    mkdir -p "${XDG_CACHE_HOME}/xpaper"
-fi
-ln -sf "${_img}" "${XDG_CACHE_HOME}/xpaper/last_wallpaper"
+ln -sf "${_img}" "${_oldimg}"
 
 # Set without using Xinerama
 feh --no-fehbg --bg-scale --no-xinerama "${_img}"
