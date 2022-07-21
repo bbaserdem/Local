@@ -19,6 +19,7 @@
 !/bin
 !/bin/*.sh
 !/bin/*.py
+!/bin/arch-repo*
 !/bin/info
 !/bin/info/*.sh
 
