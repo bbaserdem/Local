@@ -19,6 +19,8 @@
 !/bin
 !/bin/*.sh
 !/bin/*.py
+!/bin/info
+!/bin/info/*.sh
 
 # Grab the gnupg symlinks, but nothing else from this directory
 !/gnupg
