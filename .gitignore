@@ -12,10 +12,10 @@
 !/.gitmodules
 !/Readme.md
 
-# Get submodules
-!/pass
-!/archlinux
-!/gentoo
+# Don' get subrepos
+/pass
+/archlinux
+/gentoo
 
 # Grab scripts from bin
 !/bin
