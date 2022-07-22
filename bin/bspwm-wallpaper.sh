@@ -15,7 +15,7 @@ _img=''
 _oldimg="${XDG_CACHE_HOME}/last_xpaper"
 _thisdir=''
 if [ "${1}" = 'reload' ] && [ -L "${_oldimg}" ] ; then
-    _img="${_oldimg}"
+    _img="$(readlink "${_oldimg}")"
 elif [ -n "${1}" ] ; then
     if [ -d "${1}" ] ; then
         _thisdir="${1}"
@@ -72,7 +72,11 @@ if [ -z "${_img}" ] ; then
 fi
 
 # Save the background location, for quick setting in the future
-ln -sf "${_img}" "${_oldimg}"
+if [ "${_img}" != "${_oldimg}" ] ; then
+    ln --symbolic --force "${_img}" "${_oldimg}"
+else
+    rm --force "${_oldimg}"
+fi
 
 # Set without using Xinerama
 feh --no-fehbg --bg-scale --no-xinerama "${_img}"
