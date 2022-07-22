@@ -7,7 +7,7 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 # Locations
 _name="${SBP_REPO_NAME:-sbp}"
 _dest="${SBP_REPO_URL:-s3://sbp-arch/repo}"
-_source="${SBPMAN_HOME:-/etc/archlinux}"
+_source="${SBPMAN_HOME:-${HOME}/.local/archlinux/}"
 
 # Directories
 _local="${HOME}/.cache/${_name}-repo"
