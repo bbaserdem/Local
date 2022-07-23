@@ -29,16 +29,16 @@ Continuously print system information
 clicksim=''
 testing='no'
 while getopts "b:h:m:n:i:a:t" option; do
-  case "${option}" in
-    b) clicksim="${OPTARG}" ;;
-    h) echo "${help_text}" ; exit ;;
-    m) markup="${OPTARG}" ;;
-    n) name="${OPTARG}" ;;
-    i) instance="${OPTARG}" ;;
-    a) accent="${OPTARG}" ;;
-    t) testing='yes' ;;
-    ?) echo "${help_text}" ; exit 1 ;;
-  esac
+    case "${option}" in
+        b) clicksim="${OPTARG}" ;;
+        h) echo "${help_text}" ; exit ;;
+        m) markup="${OPTARG}" ;;
+        n) name="${OPTARG}" ;;
+        i) instance="${OPTARG}" ;;
+        a) accent="${OPTARG}" ;;
+        t) testing='yes' ;;
+        ?) echo "${help_text}" ; exit 1 ;;
+    esac
 done
 
 #---DEFAULTS---#
@@ -52,17 +52,17 @@ if [ -z "${instance}" ] ; then instance='default' ; fi
 if [ -z "${accent}" ] ;   then accent='cyan'      ; fi
 # Location for flocks; try sane defaults
 if [ -z "${SYSINFO_FLOCK_DIR}" ] ; then
-  if [ -n "${XDG_CACHE_HOME}" ] ; then
-    SYSINFO_FLOCK_DIR="${XDG_CACHE_HOME}/sysinfo"
-  else
-    SYSINFO_FLOCK_DIR="${HOME}/.cache/sysinfo"
-  fi
+    if [ -n "${XDG_CACHE_HOME}" ] ; then
+        SYSINFO_FLOCK_DIR="${XDG_CACHE_HOME}/sysinfo"
+    else
+        SYSINFO_FLOCK_DIR="${HOME}/.cache/sysinfo"
+    fi
 fi
 # Create file lock directory
 if [ ! -e "${SYSINFO_FLOCK_DIR}" ] ; then
-  mkdir --parents "${SYSINFO_FLOCK_DIR}"
+    mkdir --parents "${SYSINFO_FLOCK_DIR}"
 elif [ ! -d "${SYSINFO_FLOCK_DIR}" ] ; then
-  exit 1
+    exit 1
 fi
 # Initialize these, just in case
 pre=''
@@ -73,11 +73,11 @@ txt=''
 #---IDENTIFIER---#
 # Get a session identifier both for xorg and wayland
 if [ -n "${WAYLAND_DISPLAY}" ] ; then
-  IDENTIFIER="${WAYLAND_DISPLAY}"
+    IDENTIFIER="${WAYLAND_DISPLAY}"
 elif [ -n "${DISPLAY}" ] ; then
-  IDENTIFIER="${DISPLAY}"
+    IDENTIFIER="${DISPLAY}"
 else
-  IDENTIFIER="$$"
+    IDENTIFIER="$$"
 fi
 
 #---COLORS---#
@@ -114,62 +114,62 @@ elif [ "${accent}" = 'indigo' ] ; then col="${base0D}"
 elif [ "${accent}" = 'violet' ] ; then col="${base0E}"
 elif [ "${accent}" = 'brown' ]  ; then col="${base0F}"
 else # Invalid accent specification
-  exit 1
+    exit 1
 fi
 
 #---FUNCTIONS---#
 # Shortcut to suppress module
 empty_output () {
-  # Remove a module from display
-  if [ "${markup}" = 'lemonbar' ] ; then
-    # Format by lemonbar tags
-    echo ""
-  elif [ "${markup}" = 'pango' ] ; then
-    # Create pango formatted string
-    echo "{\"full_text\":\"\"}"
-  elif [ "${markup}" = 'waybar' ] ; then
-    # Create pango formatted string
-    echo "{\"text\":\"\"}"
-  fi
+    # Remove a module from display
+    if [ "${markup}" = 'lemonbar' ] ; then
+        # Format by lemonbar tags
+        echo ""
+    elif [ "${markup}" = 'pango' ] ; then
+        # Create pango formatted string
+        echo "{\"full_text\":\"\"}"
+    elif [ "${markup}" = 'waybar' ] ; then
+        # Create pango formatted string
+        echo "{\"text\":\"\"}"
+    fi
 }
 formatted_output () {
-  # Print string
-  if [ -z "${txt}" ] && [ -z "${pre}" ] && [ -z "${suf}" ] ; then
-    empty_output
-  elif [ "${markup}" = 'lemonbar' ] ; then
-    # Format by lemonbar tags
-    if [ -z "${feature}" ] ; then
-      out="%{F${col}}${pre}%{F-}${txt}%{F${col}}${suf}%{F-}"
-    elif [ "${feature}" = 'mute' ] ; then
-      out="%{F${col}}${pre}%{F-}%{F${dim}}${txt}%{F-}%{F${col}}${suf}%{F-}"
-    elif [ "${feature}" = 'urgent' ] ; then
-      out="%{F${col}}${pre}%{F-}%{F${urg}}${txt}%{F-}%{F${col}}${suf}%{F-}"
+    # Print string
+    if [ -z "${txt}" ] && [ -z "${pre}" ] && [ -z "${suf}" ] ; then
+        empty_output
+    elif [ "${markup}" = 'lemonbar' ] ; then
+        # Format by lemonbar tags
+        if [ -z "${feature}" ] ; then
+            out="%{F${col}}${pre}%{F-}${txt}%{F${col}}${suf}%{F-}"
+        elif [ "${feature}" = 'mute' ] ; then
+            out="%{F${col}}${pre}%{F-}%{F${dim}}${txt}%{F-}%{F${col}}${suf}%{F-}"
+        elif [ "${feature}" = 'urgent' ] ; then
+            out="%{F${col}}${pre}%{F-}%{F${urg}}${txt}%{F-}%{F${col}}${suf}%{F-}"
+        fi
+        echo "%{u${col} +u o${col} +o}${out}%{-u u- -o o-}"
+    elif [ "${markup}" = 'pango' ] ; then
+        # Create pango formatted string
+        out="$(echo "${txt}" | sed 's|&|&amp;|g ; s|<|&lt;|g')"
+        out="<span color='${col}'>${pre}</span>${out}<span color='${col}'>${suf}</span>"
+        if [ -z "${feature}" ] ; then
+            echo "{\"full_text\":\"${out}\"}"
+        elif [ "${feature}" = 'mute' ] ; then
+            echo "{\"full_text\":\"${out}\",\"color\":\"${dim}\"}"
+        elif [ "${feature}" = 'urgent' ] ; then
+            echo "{\"full_text\":\"${out}\",\"urgent\":true}"
+        fi
+    elif [ "${markup}" = 'waybar' ] ; then
+        out="$(echo "${txt}" | sed 's|&|&amp;|g ; s|<|&lt;|g')"
+        out="<span color='${col}'>${pre}</span>${out}<span color='${col}'>${suf}</span>"
+        if [ -n "${class}" ] ; then
+            echo "{\"text\":\"${out}\",\"class\":\"${class}\"}"
+        elif [ -z "${feature}" ] ; then
+            echo "{\"text\":\"${out}\"}"
+        elif [ "${feature}" = 'mute' ] ; then
+            echo "{\"text\":\"${out}\",\"class\":\"mute\"}"
+        elif [ "${feature}" = 'urgent' ] ; then
+            echo "{\"text\":\"${out}\",\"class\":\"urgent\"}"
+        fi
     fi
-    echo "%{u${col} +u o${col} +o}${out}%{-u u- -o o-}"
-  elif [ "${markup}" = 'pango' ] ; then
-    # Create pango formatted string
-    out="$(echo "${txt}" | sed 's|&|&amp;|g ; s|<|&lt;|g')"
-    out="<span color='${col}'>${pre}</span>${out}<span color='${col}'>${suf}</span>"
-    if [ -z "${feature}" ] ; then
-      echo "{\"full_text\":\"${out}\"}"
-    elif [ "${feature}" = 'mute' ] ; then
-      echo "{\"full_text\":\"${out}\",\"color\":\"${dim}\"}"
-    elif [ "${feature}" = 'urgent' ] ; then
-      echo "{\"full_text\":\"${out}\",\"urgent\":true}"
-    fi
-  elif [ "${markup}" = 'waybar' ] ; then
-    out="$(echo "${txt}" | sed 's|&|&amp;|g ; s|<|&lt;|g')"
-    out="<span color='${col}'>${pre}</span>${out}<span color='${col}'>${suf}</span>"
-    if [ -n "${class}" ] ; then
-      echo "{\"text\":\"${out}\",\"class\":\"${class}\"}"
-    elif [ -z "${feature}" ] ; then
-      echo "{\"text\":\"${out}\"}"
-    elif [ "${feature}" = 'mute' ] ; then
-      echo "{\"text\":\"${out}\",\"class\":\"mute\"}"
-    elif [ "${feature}" = 'urgent' ] ; then
-      echo "{\"text\":\"${out}\",\"class\":\"urgent\"}"
-    fi
-  fi
 }
 # Default to taking no actions
 click_left ()   { true ; }
@@ -181,56 +181,56 @@ scroll_down ()  { true ; }
 #---MODULE---#
 # Import the module from directories
 if [ -x "$(dirname "${0}")/${name}.sh" ] ; then
-  # shellcheck source=module.sh
-  . "$(dirname "${0}")/${name}.sh"
+    # shellcheck source=module.sh
+    . "$(dirname "${0}")/${name}.sh"
 else
-  echo "No module ${name} found in $(dirname "${0}")!"
-  exit 1
+    echo "No module ${name} found in $(dirname "${0}")!"
+    exit 1
 fi
 
 #---EMULATE CLICKS---#
 # Convert numbers to text
 case "${clicksim}" in
-  1) clicksim='click_left' ;;
-  2) clicksim='click_middle' ;;
-  3) clicksim='click_right' ;;
-  4) clicksim='scroll_up' ;;
-  5) clicksim='scroll_down' ;;
+    1) clicksim='click_left' ;;
+    2) clicksim='click_middle' ;;
+    3) clicksim='click_right' ;;
+    4) clicksim='scroll_up' ;;
+    5) clicksim='scroll_down' ;;
 esac
 # Simulate click
 if [ -n "${clicksim}" ] ; then
-  "${clicksim}"
-  exit
+    "${clicksim}"
+    exit
 fi
 
 #---ONCE---#
 if [ "${testing}" = 'yes' ] ; then
-  print_info
-  exit
+    print_info
+    exit
 fi 
 
 #---OUTPUT---#
 # Exit if function does not exist
 if type "print_loop" 2>/dev/null | grep --invert-match --quiet 'function' ; then
-  echo "print_loop for ${name} is not available!"
-  exit 1
+    echo "print_loop for ${name} is not available!"
+    exit 1
 fi
 
 # If we are pango (i3blocks) then also listen
 # If not; then just run the print loop
 if [ "${markup}" = 'pango' ] ; then
-  print_loop &
-  #---LISTENING---# ; Responde to inputs
-  while read -r input_button ; do
+print_loop &
+#---LISTENING---# ; Responde to inputs
+while read -r input_button ; do
     case "$(echo "${input_button}" | jq --raw-output '.button' 2>/dev/null)" in
-      1) "click_left"   || continue ;;
-      2) "click_middle" || continue ;;
-      3) "click_right"  || continue ;;
-      4) "scroll_up"    || continue ;;
-      5) "scroll_down"  || continue ;;
-      *) true ;;
+        1) "click_left"   || continue ;;
+        2) "click_middle" || continue ;;
+        3) "click_right"  || continue ;;
+        4) "scroll_up"    || continue ;;
+        5) "scroll_down"  || continue ;;
+        *) true ;;
     esac
-  done
+    done
 else
-  print_loop
+    print_loop
 fi

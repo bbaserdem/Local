@@ -23,18 +23,18 @@ click_right ()  { true ; }
 scroll_up ()    { true ; }
 scroll_down ()  { true ; }
 print_info () {
-  # Example pre-amble
-  pre=''
-  suf=''
-  txt='Example text'
-  feature=''
-  # Print string
-  formatted_output
+    # Example pre-amble
+    pre=''
+    suf=''
+    txt='Example text'
+    feature=''
+    # Print string
+    formatted_output
 }
 
 print_loop () {
-  while : ; do
-    print_info || break
-    sleep 1
-  done
+    while : ; do
+        print_info || break
+        sleep 1
+    done
 }

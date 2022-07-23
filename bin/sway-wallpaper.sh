@@ -22,10 +22,10 @@ fi
 
 imfind_dir () {
     find "$1" -type f -a '(' \
-      -iname "${theme}*.jpg"  -o \
-      -iname "${theme}*.jpeg" -o \
-      -iname "${theme}*.png" ')' -print 2>/dev/null \
-      | shuf -n 1 -
+        -iname "${theme}*.jpg"  -o \
+        -iname "${theme}*.jpeg" -o \
+        -iname "${theme}*.png" ')' -print 2>/dev/null \
+        | shuf -n 1 -
 }
 # Try to find image; if a dir is specified
 if [ -n "${SBP_WPAPER_DIR}" ] && [ -d "${SBP_WPAPER_DIR}" ]; then
@@ -60,15 +60,15 @@ ln -sf "${wallp}" "${cache_dir}/last_wallpaper"
 
 # Operate on all the monitors
 for monitor in $name ; do
-  # Parse the proper WxH+x+y for this monitor
-  res="$(echo "${info}" | jq --raw-output \
-    '.[] | select(.name == "'"${monitor}"'") | .rect | (.width|tostring) + "x" + (.height|tostring) + "+" + (.x|tostring) + "+" + (.y|tostring)')"
-  # Create the temporary splice
-  thisfile="${cache_dir}/${monitor}.png"
-  if [ -e "${thisfile}" ] ; then
-    rm "${thisfile}"
-  fi
-  convert "${wallp}" -crop "${res}" +repage "${thisfile}"
-  # Apply this wallpaper
-  swaymsg output "${monitor}" bg "${thisfile}" fill
+    # Parse the proper WxH+x+y for this monitor
+    res="$(echo "${info}" | jq --raw-output \
+        '.[] | select(.name == "'"${monitor}"'") | .rect | (.width|tostring) + "x" + (.height|tostring) + "+" + (.x|tostring) + "+" + (.y|tostring)')"
+    # Create the temporary splice
+    thisfile="${cache_dir}/${monitor}.png"
+    if [ -e "${thisfile}" ] ; then
+        rm "${thisfile}"
+    fi
+    convert "${wallp}" -crop "${res}" +repage "${thisfile}"
+    # Apply this wallpaper
+    swaymsg output "${monitor}" bg "${thisfile}" fill
 done

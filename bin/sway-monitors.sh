@@ -47,14 +47,14 @@ reload_dual () {
 
 reload_monitors () {
     # LAPTOP: has eDP(-1) (lid) DP-1 and DP-2 ports
-    if [ $(hostname) = 'sbplaptop' ] || [ $(hostname) = 'sbpnotebook' ] ; then
+    if ( uname -n | grep -q 'laptop' ) ; then
         reload_laptop
     # WORKSTATION: Monitors are static
-    elif [[ $(hostname) == 'sbpworkstation' ]] ; then
+    elif ( uname -n | grep -q 'work' ) ; then
         echo "Using Workstation"
         reload_dual 'DVI-I-1' 'DP-1'
     # SERVER: 
-    elif [[ $(hostname) == 'sbpserver' ]] ; then
+    elif ( uname -n | grep -q 'server' ) ; then
         echo "Using Server"
         reload_dual 'DP-1' 'HDMI-2'
         /usr/bin/xrandr --output DP-1 --primary

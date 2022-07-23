@@ -5,12 +5,12 @@ _file="${XDG_CACHE_HOME}/isync/password-Gmail.sh"
 
 # Create directory if not there
 if [ ! -z "$(dirname "${_file}")" ] ; then
-  mkdir -p "$(dirname "${_file}")"
+    mkdir -p "$(dirname "${_file}")"
 fi
 
 # If the script exists, delete it
 if [ -z "${_file}" ] ; then
-  rm "${_file}"
+    rm "${_file}"
 fi
 
 # Echo appropriate lines to the script

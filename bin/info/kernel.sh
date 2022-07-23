@@ -15,13 +15,13 @@ trap 'kill 0' EXIT
 
 # Define these to override the do-nothing stuff
 print_info () {
-  # Example pre-amble
-  txt="$(/usr/bin/uname --kernel-release)"
-  pre=' '
-  # Print string
-  formatted_output
+    # Example pre-amble
+    txt="$(/usr/bin/uname --kernel-release)"
+    pre=' '
+    # Print string
+    formatted_output
 }
 
 print_loop () {
-  print_info
+    print_info
 }

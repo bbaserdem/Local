@@ -15,35 +15,35 @@ trap 'kill 0' EXIT
 # Fan module
 #  * Takes optional instance
 if [ -z "${SYSINFO_FAN_POLL}" ] ; then
-  SYSINFO_FAN_POLL=5
+    SYSINFO_FAN_POLL=5
 fi
 print_info () {
-  pre=' '
-  suf=''
-  # Check fan output
-  if [ "${instance}" = 'default' ] ; then
-    int='fan'
-  else
-    int="${instance}"
-  fi
-  if [ ! -x '/usr/bin/sensors' ] ; then
-    empty_output
-    exit 1
-  fi
-  txt="$(/usr/bin/sensors | awk "/${int}/ {print \$2}")"
-  if [ -z "${txt}" ] ; then
-    # If there is no fan output; still print a pretty text
-    txt=''
+    pre=' '
+    suf=''
+    # Check fan output
+    if [ "${instance}" = 'default' ] ; then
+        int='fan'
+    else
+        int="${instance}"
+    fi
+    if [ ! -x '/usr/bin/sensors' ] ; then
+        empty_output
+        exit 1
+    fi
+    txt="$(/usr/bin/sensors | awk "/${int}/ {print \$2}")"
+    if [ -z "${txt}" ] ; then
+        # If there is no fan output; still print a pretty text
+        txt=''
+        formatted_output
+        exit 1
+    fi
+    # Print string
     formatted_output
-    exit 1
-  fi
-  # Print string
-  formatted_output
 }
 
 print_loop () {
-  while : ; do
-    print_info || break
-    sleep "${SYSINFO_FAN_POLL}"
-  done
+    while : ; do
+        print_info || break
+        sleep "${SYSINFO_FAN_POLL}"
+    done
 }

@@ -74,7 +74,7 @@ local_update () {
             echo "#include Stignore/general"        >> "${_fl}/.stignore"
         fi
         # Strip hostname
-        _name="$(hostname | sed -n 's|sbp-\(.*\)|\1|p')"
+        _name="$(hostname | sed -n 's|sbp-\([a-z,A-Z]*\)-\(.*\)|\2|p')"
         if [ ! -z "${_name}" ]; then
             if [ -e "${_fl}/Stignore/${_name}" ] ; then
                 echo "// Block files according to ${_name}" >> "${_fl}/.stignore"
@@ -97,7 +97,8 @@ local_update () {
 
 archive_keys () {
     # Function to do a backup of various keys in the home folder
-    _tgt="Keys_$(hostname).tar"
+    _name="$(hostname | sed -n 's|sbp-\([a-z,A-Z]*\)-\(.*\)|\2|p')"
+    _tgt="Keys_${_name}.tar"
     if [ -f "${HOME}/${_tgt}" ] ; then
         mv "${HOME}/${_tgt}" "${HOME}/${_tgt}_old_$(date '+%Y-%m-%d_%Hh%Mm%Ss')"
     fi
@@ -135,7 +136,8 @@ archive_keys () {
 }
 
 extract_keys () {
-    _tgt="${HOME}/Downloads/Keys_$(hostname).tar"
+    _name="$(hostname | sed -n 's|sbp-\([a-z,A-Z]*\)-\(.*\)|\2|p')"
+    _tgt="Keys_${_name}.tar"
     if [ ! -f "${_tgt}" ] ; then
         echo "Archive not found, ${_tgt}"
     else
