@@ -7,7 +7,7 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 # Locations
 _name="${SBP_REPO_NAME:-sbp}"
 _dest="${SBP_REPO_URL:-s3://sbp-arch/repo}"
-_source="${SBPMAN_HOME:-${HOME}/.local/archlinux/}"
+_srcd="${SBP_REPO_DIR:-${HOME}/.local/archlinux/}"
 
 # Directories
 _local="${HOME}/.cache/${_name}-repo"
@@ -19,8 +19,8 @@ _conf="${XDG_CONFIG_HOME}/pacman/makepkg.conf"
 [ -e "${_conf}" ] || _conf="/etc/makepkg.conf"
 
 # Create directories if they dont exist and clean
-mkdir -p "${_local}" & rm -rf "${_local}/"*
-mkdir -p "${_build}" & rm -rf "${_build}/"*
+mkdir -p "${_local}" & rm -rf "${_local:?}/"*
+mkdir -p "${_build}" & rm -rf "${_build:?}/"*
 
 # Create the chroot if not present
 mkdir -p "${_chroot}"
@@ -38,16 +38,16 @@ ln -sf "${_local}/$(basename "${_filelist}")" "${_local}/$_name.files"
 
 # Do for all arguments
 for _arg in "${@}"; do
-    if [ -d "${_source}/${_arg}" ] ; then
+    if [ -d "${_srcd}/${_arg}" ] ; then
 
         # Copy package to build path
-        cp -rf "${_source}/${_arg}" "${_build}/"
+        cp -rf "${_srcd}/${_arg}" "${_build}/"
         _loc="${_build}/${_arg}"
 
         # Build the package
-        cd "${_loc}"
+        cd "${_loc}" || exit
         makechrootpkg -cur "${_chroot}"
-        cd -
+        cd - || exit
 
         # For each individual file packaged
         for _file in $(find "${_loc}/" -maxdepth 1 -name "*.pkg.tar*") ; do
@@ -57,11 +57,11 @@ for _arg in "${@}"; do
             _pre="$(echo _file | sed 's|^\(a-z,A-Z,-]*\)-[0-9]\(.*\)|\1|g')"
             s3cmd rm "${_dest}/${_pre}-*" || true
             # Add to s3
-            s3cmd sync --acl-public $_file "${_dest}/"
+            s3cmd sync --acl-public "$_file" "${_dest}/"
         done
 
     else
-        echo "Package directory not found; ${_source}/${_arg}, skipping..."
+        echo "Package directory not found; ${_srcd}/${_arg}, skipping..."
     fi
 done
 
