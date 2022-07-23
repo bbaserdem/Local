@@ -13,7 +13,7 @@
 #   Android string reservedChars = "?:\"*|/\\<>";
 
 # Get the screenshots directory
-case "$(hostname)" in
+case "$(uname -n)" in
     *-laptop)   this_comp="/Laptop" ;;
     *-work)     this_comp="/Work"   ;;
     *-home)     this_comp="/Home"   ;;
