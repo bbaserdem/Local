@@ -63,6 +63,7 @@ scroll_down () {
 
 print_info () {
     feature=''
+    suf=''
     _name="$(pactl --format=json info | jq --raw-output ".default_${instance}_name")"
     _info="$(pactl --format=json list "${instance}s" | \
         jq --raw-output 'map(select(.name == "'"${_name}"'")) | .[]')"
@@ -75,22 +76,24 @@ print_info () {
     _ptyp="$(echo "${_info}" | jq --raw-output '.ports | map(select(.name == "'"${_port}"'")) | .[].type')"
     # Get icon name
     _icon="$(echo "${_info}" | jq --raw-output '.properties."device.icon_name"')"
+    # Check if it's a bluetooth sink, adjust suffix
+    echo "${_name}" | grep -q 'bluez' && suf=' '
     if [ "${instance}" = 'sink' ] ; then 
         # Determine icon for the sink, based on device.icon_name
         case "${_name}" in
-            *"HDMI"*)                                           pre="﴿ " ;;
-            *"DualShock"*)                                      pre=" " ;;
+            *"HDMI"*)                                                 pre="﴿ "                   ;;
+            *"DualShock"*)                                            pre=" "                   ;;
             *)
                 case "${_icon}" in
-                    *usb*)                                          pre="禍 " ;;
-                    *hdmi*)                                         pre="﴿ " ;;
-                    *headset*)            [ "${d_mute}" = 'no' ] && pre=" "  || pre=" "  ;;
-                    *a2dp*)               [ "${d_mute}" = 'no' ] && pre="﫽 " || pre="﫾 " ;;
-                    *hifi*|*stereo*)                                pre="﫛 " ;;
-                    *headphone*|*lineout*)[ "${d_mute}" = 'no' ] && pre=" "  || pre="ﳌ "  ;;
-                    *speaker*)            [ "${d_mute}" = 'no' ] && pre="蓼 " || pre="遼 " ;;
-                    *network*)                                      pre="爵 " ;;
-                    *)                    [ "${d_mute}" = 'no' ] && pre="墳 " || pre="ﱝ "  ;;
+                    *usb*)                                            pre="禍 "                 ;;
+                    *hdmi*)                                           pre="﴿ "                  ;;
+                    *headset*)            [ "${_mute}" = 'false' ] && pre=" "  || pre=" "     ;;
+                    *a2dp*)               [ "${_mute}" = 'false' ] && pre="﫽 " || pre="﫾 "    ;;
+                    *hifi*|*stereo*)                                  pre="﫛 "                 ;;
+                    *headphone*|*lineout*)[ "${_mute}" = 'false' ] && pre=" "  || pre="ﳌ "     ;;
+                    *speaker*)            [ "${_mute}" = 'false' ] && pre="蓼 " || pre="遼 "    ;;
+                    *network*)                                        pre="爵 "                 ;;
+                    *)                    [ "${_mute}" = 'false' ] && pre="墳 " || pre="ﱝ "     ;;
                 esac
                 ;;
         esac
@@ -103,21 +106,15 @@ print_info () {
         #     Speaker)    if [ "${_mute}" = 'false' ] && pre="蓼 " || pre="遼 " ;;
         #     *)          if [ "${_mute}" = 'false' ] && pre="墳 " || pre="婢 " ;;
         # esac
-        # Check if it's a bluetooth sink, adjust suffix
-        if echo "${_name}" | grep -q 'bluez' ; then
-            suf=' '
-        else
-            suf=''
-        fi
     elif [ "${instance}" = 'source' ] ; then
         # Determine icon for the sink
         case "${_icon}" in
-            audio-card-pci) [ "${d_mute}" = 'no' ] && pre=" "  || pre=" " ;;
-            camera-web-usb)                           pre="犯 "             ;;
-            *)              [ "${d_mute}" = 'no' ] && pre=" "  || pre=" " ;;
+            audio-card-pci) [ "${_mute}" = 'no' ] && pre=" "  || pre=" " ;;
+            camera-web-usb)                          pre="犯 "             ;;
+            *)              [ "${_mute}" = 'no' ] && pre=" "  || pre=" " ;;
         esac
         # Check if it's a bluetooth source
-        if echo "${d_src}" | grep -q 'bluez' ; then
+        if echo "${_icon}" | grep -q 'bluez' ; then
             suf=' '
         else
             suf=''
