@@ -17,8 +17,8 @@ trap 'kill 0' EXIT
 #  * Does not have any functions
 
 # On the PC; default to pwrstat interface
-if [ "$(hostname)" = 'sbp-arch-work' ] || [ "$(hostname)" = 'sbp-gentoo-work' ]
-then
+_host="$(uname -n)"
+if [ "${_host}" = 'sbp-arch-work' ] || [ "${_host}" = 'sbp-gentoo-work' ] ; then
     instance='cyberpower'
 fi
 if [ -z "${SYSINFO_BAT_POLL}" ] ; then
@@ -38,9 +38,9 @@ print_info () {
             pre='ﳧ '
             txt=''
             suf=''
-        else
-            perc="$(/usr/bin/upsc cyberpower battery.charge)"
-            from="$(/usr/bin/upsc cyberpower ups.status)"
+        elif upsc cyberpower >/dev/null 2>&1 ; then
+            perc="$(upsc cyberpower battery.charge)"
+            from="$(upsc cyberpower ups.status)"
             # Set the prefix to source
             case "$(echo "${from}" | awk '{print $1}')" in
                 OL) pre='臘 ' ;;
@@ -51,6 +51,10 @@ print_info () {
             suf=''
             # Set the text
             txt="${perc} "
+        else
+            pre='ﳥ '
+            txt=''
+            feature='mute'
         fi
     else
         bat="$(acpi --battery    2>/dev/null | grep "Battery ${bid}" | head -n 1)"
