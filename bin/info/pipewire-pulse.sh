@@ -55,9 +55,9 @@ scroll_up () {
 # Scroll down
 scroll_down () {
     if [ "${instance}" = 'source' ] ; then
-        pipewire-pulse-volume.sh -s -r -p 1
+        pipewire-pulse-volume.sh -s -p -r 1
     elif [ "${instance}" = 'sink' ] ; then
-        pipewire-pulse-volume.sh -r -p 1
+        pipewire-pulse-volume.sh -p -r 1
     fi
 }
 
