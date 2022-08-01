@@ -46,7 +46,6 @@ symlinks_and_directories () {
     ln --symbolic --force "${HOME}/.config/X11/keymap"      "${HOME}/.Xkbmap"
 
     # Non-xdg-compliant configuration options
-    ln --symbolic --force "${HOME}/.config/abcde.conf"          "${HOME}/.abcde.conf"
     ln --symbolic --force "${HOME}/.config/gtk-2.0/gtkrc"       "${HOME}/.gtkrc-2.0"
     ln --symbolic --force "${HOME}/.config/cursor/index.theme"  "${HOME}/.icons/default/index.theme"
     ln --symbolic --force "${HOME}/.config/latex/latexmkrc"     "${HOME}/.latexmkrc"
