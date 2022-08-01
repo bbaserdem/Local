@@ -47,7 +47,9 @@ this_lock() {
             --indicator \
             --keylayout 0 \
             --clock \
-            --pass-media-keys --pass-screen-keys \
+            --pass-power-keys \
+            --pass-media-keys \
+            --pass-screen-keys \
             --radius 180 \
             --bar-indicator --bar-width=50
     ) 9>"${_lock}"
