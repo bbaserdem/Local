@@ -27,29 +27,65 @@ print_info () {
     # Example pre-amble
     pre=' '
     suf=''
+    txt=''
+    # Some overrides for locations based on hostname
+    if uname -n | grep --quiet --regexp 'sbp-.*-laptop' 2>/dev/null ; then
+        if [ "${instance}" = 'home' ] ; then
+            instance='quit'
+        elif [ "${instance}" = 'archive' ] ; then
+            instance='data'
+        elif [ "${instance}" = 'root' ] ; then
+            instance='filesystem-btrfs'
+        fi
+    fi
+    # Utilize some predetermined quantifiers
     if [ -d "${instance}" ] ; then
         dir="${instance}"
-        txt="${instance}: "
-    elif [ "${instance}" = 'default' ] || [ "${instance}" = 'root' ] ; then
+        txt="$(basename "${instance}"): "
+    elif [ "${instance}" = 'root' ] ; then
+        pre='פּ '
         dir="/"
-        txt="Root: "
     elif [ "${instance}" = 'home' ] ; then
         pre=' '
         dir="/home"
-        txt="Home: "
     elif [ "${instance}" = 'archive' ] ; then
         pre=' '
         dir="/home/archive"
         txt="Archive: "
+    elif [ "${instance}" = 'data' ] ; then
+        pre=' '
+        dir="/home/data"
+        txt="Data: "
+    elif [ "${instance}" = 'windows' ] ; then
+        pre=' '
+        dir="/mnt/windows"
+    elif [ "${instance}" = 'filesystem-btrfs' ] ; then
+        pre='פּ '
+        dir="/mnt/filesystem-btrfs"
+        txt="FS: "
+    elif [ "${instance}" = 'quit' ] ; then
+        empty_output
+        exit 1
     fi
     # Check if directory exists and is a mount point
     if ! /bin/mountpoint --quiet "${dir}" ; then
         empty_output
         exit 1
     fi
-    # Get filled percentage
-    prc="$(df --human-readable --portability --local \
-        | awk "{if(\$6 == \"${dir}\"){print substr(\$5, 1, length(\$5)-1)}}")"
+    # Get filled percentage, use btrf is fs is btrfs
+    if btrfs filesystem df "{dir}" 1>/dev/null 2>&1 ; then
+        prc="$(btrfs filesystem usage "${dir}" 2>/dev/null | awk '
+            BEGIN { size = 0; used = 0; }
+            /Device size:/      { size = $3; }
+            /Device allocated:/ { used = $3; }
+            END { print int(100 * used / size); }')"
+    else
+        prc="$(df --human-readable --portability --local | awk '
+            BEGIN { perc=0; } {
+            if( $6 == "'"${dir}"'" ) { perc = substr($5, 1, length($5) - 1); }
+            } END { print perc; }')"
+    fi
+    # Mark if FS is filled up
     if [ "${prc}" -gt 90 ] ; then
         feature='urgent'
         suf=' '
