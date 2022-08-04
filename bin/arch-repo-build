@@ -10,20 +10,20 @@ _dest="${SBP_REPO_URL:-s3://sbp-arch/repo}"
 _srcd="${SBP_REPO_DIR:-${HOME}/.local/archlinux/}"
 
 # Directories
-_local="${HOME}/.cache/${_name}-repo"
-_build="${HOME}/.cache/${_name}-build"
-_chroot="${HOME}/.cache/${_name}-chroot"
+_local="/tmp/${_name}-repo"
+_build="/tmp/${_name}-build"
+_chroot="/tmp/${_name}-chroot"
 
 # Config
 _conf="${XDG_CONFIG_HOME}/pacman/makepkg.conf"
 [ -e "${_conf}" ] || _conf="/etc/makepkg.conf"
 
 # Create directories if they dont exist and clean
-mkdir -p "${_local}" & rm -rf "${_local:?}/"*
-mkdir -p "${_build}" & rm -rf "${_build:?}/"*
+mkdir --parents "${_local}" & rm -rf "${_local:?}/"*
+mkdir --parents "${_build}" & rm -rf "${_build:?}/"*
 
 # Create the chroot if not present
-mkdir -p "${_chroot}"
+mkdir --parents "${_chroot}"
 if [ ! -e "${_chroot}/root" ] ; then
     mkarchroot -C /etc/pacman.conf -M "${_conf}" "$_chroot/root" base base-devel
 fi
@@ -33,15 +33,15 @@ _database="$(s3cmd ls "${_dest}/${_name}" | awk '/\.db\./ && !/old$/ {print $4}'
 _filelist="$(s3cmd ls "${_dest}/${_name}" | awk '/\.files\./ && !/old$/ {print $4}')"
 s3cmd sync "${_database}" "${_local}/"
 s3cmd sync "${_filelist}" "${_local}/"
-ln -sf "${_local}/$(basename "${_database}")" "${_local}/$_name.db"
-ln -sf "${_local}/$(basename "${_filelist}")" "${_local}/$_name.files"
+ln --symbolic --force "${_local}/$(basename "${_database}")" "${_local}/$_name.db"
+ln --symbolic --force "${_local}/$(basename "${_filelist}")" "${_local}/$_name.files"
 
 # Do for all arguments
 for _arg in "${@}"; do
     if [ -d "${_srcd}/${_arg}" ] ; then
 
         # Copy package to build path
-        cp -rf "${_srcd}/${_arg}" "${_build}/"
+        cp --recursive --force "${_srcd}/${_arg}" "${_build}/"
         _loc="${_build}/${_arg}"
 
         # Build the package
