@@ -10,9 +10,19 @@ _dest="${SBP_REPO_URL:-s3://sbp-arch/repo}"
 _srcd="${SBP_REPO_DIR:-${HOME}/.local/archlinux/}"
 
 # Directories
-_local="/tmp/${_name}-repo"
-_build="/tmp/${_name}-build"
-_chroot="/tmp/${_name}-chroot"
+if [ -d "${XDG_CACHE_HOME}" ] ; then
+    _local="${XDG_CACHE_HOME}/${_name}-repo"
+    _build="${XDG_CACHE_HOME}/${_name}-build"
+    _chroot="${XDG_CACHE_HOME}/${_name}-chroot"
+elif [ -d "${HOME}/.cache" ] ; then
+    _local="${HOME}/.cache/${_name}-repo"
+    _build="${HOME}/.cache/${_name}-build"
+    _chroot="${HOME}/.cache/${_name}-chroot"
+else
+    _local="/tmp/${_name}-repo"
+    _build="/tmp/${_name}-build"
+    _chroot="/tmp/${_name}-chroot"
+fi
 
 # Config
 _conf="${XDG_CONFIG_HOME}/pacman/makepkg.conf"

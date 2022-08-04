@@ -9,7 +9,15 @@ _name="${SBP_REPO_NAME:-sbp}"
 _dest="${SBP_REPO_URL:-s3://sbp-arch/repo}"
 
 # Directories
-_local="/tmp/${_name}-repo"
+if [ -d "${XDG_CACHE_HOME}" ] ; then
+    _local="${XDG_CACHE_HOME}/${_name}-repo"
+elif [ -d "${HOME}/.cache" ] ; then
+    _local="${HOME}/.cache/${_name}-repo"
+else
+    _local="/tmp/${_name}-repo"
+fi
+
+# Create and clean directories
 mkdir --parents "${_local}" & rm --recursive --force "${_local:?}/"*
 
 # Sync remote DB to local
