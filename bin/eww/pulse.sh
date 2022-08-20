@@ -1,10 +1,10 @@
 #!/bin/dash
 # vim:ft=sh
-
 # Kill all descendents on exit
 trap 'exit' INT TERM
 trap 'kill 0' EXIT
-
+# Load correct daemon
+alias ewwinfo="eww --config ${XDG_CONFIG_HOME}/eww/infobar"
 #########################################
 #          _                   _ _      #
 #  ___ _ _| |___ ___ ___ _ _ _| |_|___  #
@@ -14,54 +14,14 @@ trap 'kill 0' EXIT
 #########################################
 # Pipewire-pulseaudio module;
 #  * Only needs pactl (libpulse)
-#  * Needs a instance of either 'sink' or 'source'
-if [ -z "${instance}" ] || [ "${instance}" = 'default' ] ; then
-    instance='sink'
-fi
+#  * Buffer duration to stagger; in milliseconds
+buffer_ms=200
+# * Can take one positional variable; source or sink
+[ -z "${1}" ] && instance='sink' || instance="${1}"
+[ "${instance}" != 'source' ] && [ "${instance}" != 'sink' ] && exit 2
+# * The following variables are used throughout
 
-click_left () { # Left click action
-    # Toggle mute
-    /usr/bin/pactl "set-${instance}-mute" \
-        "@DEFAULT_$(echo ${instance} | awk '{print toupper($0)}')@" toggle
-}
-
-# Middle mouse action
-click_middle () { 
-    if [ "${instance}" = 'source' ] ; then
-        pipewire-pulse-sink.sh -s 
-    elif [ "${instance}" = 'sink' ] ; then
-        pipewire-pulse-sink.sh 
-    fi
-}
-
-# Right mouse action
-click_right () {
-    ( flock --nonblock 7 || exit 7
-        if [ -x '/usr/bin/pavucontrol' ] ; then
-            /usr/bin/pavucontrol
-        fi
-    ) 7>"${SYSINFO_FLOCK_DIR}/${name}_${IDENTIFIER}_right" >/dev/null 2>&1 &
-}
-
-# Scroll up
-scroll_up () {
-    if [ "${instance}" = 'source' ] ; then
-        pipewire-pulse-volume.sh -s -p 1
-    elif [ "${instance}" = 'sink' ] ; then
-        pipewire-pulse-volume.sh -p 1
-    fi
-}
-
-# Scroll down
-scroll_down () {
-    if [ "${instance}" = 'source' ] ; then
-        pipewire-pulse-volume.sh -s -p -r 1
-    elif [ "${instance}" = 'sink' ] ; then
-        pipewire-pulse-volume.sh -p -r 1
-    fi
-}
-
-print_info () {
+read_info () {
     feature=''
     suf=''
     _name="$(pactl --format=json info | jq --raw-output ".default_${instance}_name")"
@@ -130,12 +90,30 @@ print_info () {
     # Print string
     formatted_output
 }
+
 print_loop () {
-    # Print once
-    print_info || exit
-    pactl subscribe 2>/dev/null | while read -r _line ; do
-        if echo "${_line}" | grep --quiet --ignore-case "${instance}\|'change' on server #" ; then
-            print_info
-        fi
-    done
+    # Wrapper on listener that will do staggered prints
+    # Subscribe to listener; and capture all stdin and stderr
+    # First echo'd line will be the PID; so we can avoid orphans
+    (pactl subscribe 2>&1 & echo "${!}" && wait) | (
+        # Trap to kill the listener if parser loop is done
+        trap 'kill "${_thispid}"; trap - EXIT' EXIT
+        read -r _thispid
+        # Do first line of printing, and record the time.
+        print_info && _last="$(($(date '+%s%3N') - buffer_ms))" || exit
+        # Loop until listener breaks
+        while ps -o pid= -p "${_thispid}" >/dev/null 2>&1 ; do
+            # Wait until pactl submits relevant event
+            grep --max-count=1 --quiet --line-buffered  \
+                --regexp "Event 'change' on server "    \
+                --regexp "Event 'change' on sink "
+            _curr="$(date '+%s%3N')"
+            # Print only if the time between last and now is beyond buffer
+            if [ "$((_curr - _last))" -ge "${buffer_ms}" ] ; then
+                print_info && _last="${_curr}" || exit
+                # Schedule another line of printing to refresh after buffer
+                ( sleep "${buffer_ms}e-3s" ; print_info ) &
+            fi
+        done
+    )
 }

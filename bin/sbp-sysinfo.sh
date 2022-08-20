@@ -123,7 +123,7 @@ empty_output () {
     # Remove a module from display
     if [ "${markup}" = 'lemonbar' ] ; then
         # Format by lemonbar tags
-        echo ""
+        echo ''
     elif [ "${markup}" = 'pango' ] ; then
         # Create pango formatted string
         echo "{\"full_text\":\"\"}"
@@ -180,7 +180,7 @@ scroll_down ()  { true ; }
 
 #---MODULE---#
 # Import the module from directories
-script_name="$(dirname "${0}")/info/${name}.sh"
+script_name="$(dirname "${0}")/sysinfo/${name}.sh"
 if [ -x "${script_name}" ] ; then
     # shellcheck source=module.sh
     . "${script_name}"
@@ -221,7 +221,7 @@ fi
 # If not; then just run the print loop
 if [ "${markup}" = 'pango' ] ; then
     print_loop &
-    #---LISTENING---# ; Responde to inputs
+    #---LISTENING---# ; Respond to inputs
     while read -r input_button ; do
         case "$(echo "${input_button}" | jq --raw-output '.button' 2>/dev/null)" in
             1) "click_left"   || continue ;;

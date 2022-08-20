@@ -22,8 +22,10 @@
 !/bin/*.sh
 !/bin/*.py
 !/bin/arch-repo*
-!/bin/info
-!/bin/info/*.sh
+!/bin/sysinfo
+!/bin/sysinfo/*.sh
+!/bin/eww
+!/bin/eww/*.sh
 
 # Grab the gnupg symlinks, but nothing else from this directory
 !/gnupg

@@ -2,7 +2,13 @@
 # This script refreshes backdrop of desktops when called
 # Either say refresh; which then refreshes background,
 # Or theme; which only grabs the correct themed wallpaper
-# Or directory, which 
+imfind_dir () {
+    find "${1}" -type f -a '(' \
+        -iname "${_theme}*.jpg"  -o \
+        -iname "${_theme}*.jpeg" -o \
+        -iname "${_theme}*.png" ')' -print 2>/dev/null \
+        | shuf -n 1 -
+}
 
 # Get rectangle information of the screen
 _rect="$(xdpyinfo | awk '/dimensions/ {print $2;}')"
@@ -26,14 +32,10 @@ elif [ -n "${1}" ] ; then
         _theme="${1}"
     fi
 fi
-
-imfind_dir () {
-    find "${1}" -type f -a '(' \
-        -iname "${_theme}*.jpg"  -o \
-        -iname "${_theme}*.jpeg" -o \
-        -iname "${_theme}*.png" ')' -print 2>/dev/null \
-        | shuf -n 1 -
-}
+_base="$(xdg-user-dir PICTURES)"
+if [ -z "${_base}" ] || [ "${_base}" = "${HOME}" ] ; then
+    _base="${HOME}/Pictures"
+fi
 
 if [ -n "${_img}" ] ; then
     # Use old image if already loaded
@@ -45,12 +47,12 @@ elif [ -n "${_thisdir}" ]; then
     else
         _img="$(imfind_dir "${_thisdir}")"
     fi
-elif [ -n "${SBP_XPAPER_DIR}" ] && [ -d "${SBP_XPAPER_DIR}" ]; then
+elif [ -n "${SBP_XPAPER_DIR}" ] && [ -d "${_base}/${SBP_XPAPER_DIR}" ]; then
     # Try to find image; if a dir is specified
-    if [ -d "${SBP_XPAPER_DIR}/${_x}x${_y}" ] ; then
-        _img="$(imfind_dir "${SBP_XPAPER_DIR}/${_x}x${_y}")"
+    if [ -d "${_base}/${SBP_XPAPER_DIR}/${_x}x${_y}" ] ; then
+        _img="$(imfind_dir "${_base}/${SBP_XPAPER_DIR}/${_x}x${_y}")"
     else
-        _img="$(imfind_dir "${SBP_XPAPER_DIR}")"
+        _img="$(imfind_dir "${_base}/${SBP_XPAPER_DIR}")"
     fi
 else
     # If the dir is not specified; try to find one in other locations
@@ -58,10 +60,10 @@ else
         _img="$(imfind_dir "/usr/share/backgrounds/${_x}x${_y}")"
     elif [ -d '/usr/share/backgrounds' ] ; then
         _img="$(imfind_dir '/usr/share/backgrounds')"
-    elif [ -d "${HOME}/Pictures/Wallpapers/${_x}x${_y}" ] ; then
-        _img="$(imfind_dir "${HOME}/Pictures/Wallpapers/${_x}x${_y}")"
-    elif [ -d "${HOME}/Pictures/Wallpapers" ] ; then
-        _img="$(imfind_dir "${HOME}/Pictures/Wallpapers")"
+    elif [ -d "${_base}/Wallpapers/${_x}x${_y}" ] ; then
+        _img="$(imfind_dir "${HOME}/Wallpapers/${_x}x${_y}")"
+    elif [ -d "${_base}/Wallpapers" ] ; then
+        _img="$(imfind_dir "${HOME}/Wallpapers")"
     fi
 fi
 
